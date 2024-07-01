@@ -403,15 +403,24 @@ class ChessBoard(Group):
       
     def load_pgn(self, pgn_path):
         """
-        Load a game from a PGN file and return move array.
+        Load all games from a PGN file and return a list of move arrays for each game.
+
+        Args:
+            pgn_path (str): The path to the PGN file.
+
+        Returns:
+            list: A list of move arrays, each representing the moves of a single game.
         """
+        games = []
         with open(pgn_path) as pgn_file:
-            game = chess.pgn.read_game(pgn_file)
-
-        board = chess.Board()
-        self.load_fen(board.fen())
-
-        return game.mainline_moves()
+            while True:
+                game = chess.pgn.read_game(pgn_file)
+                if game is None:
+                    break
+                board = chess.Board()
+                self.load_fen(board.fen())
+                games.append(list(game.mainline_moves()))
+        return games
 
 class ChessPiece(Mobject):
     def __init__(self, color, piece_name, path="", **kwargs):
