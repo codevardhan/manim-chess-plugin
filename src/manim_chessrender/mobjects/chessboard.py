@@ -22,7 +22,7 @@ class ChessBoard(Group):
         chessboard (chess.Board): A chess board object from the python-chess library.
     """
     
-    def __init__(self, square_colors=(WHITE, GREEN), line_color=BLACK, strict_mode=True):
+    def __init__(self, square_colors=(WHITE, GREEN), line_color=BLACK, strict_mode=True, **kwargs):
         """
         Initializes the ChessBoard with the given square colors, line color, and strict mode flag.
 
@@ -30,8 +30,9 @@ class ChessBoard(Group):
             square_colors (tuple, optional): Colors of the squares. Defaults to (WHITE, GREEN).
             line_color (color, optional): Color of the lines. Defaults to BLACK.
             strict_mode (bool, optional): Flag for strict mode. Defaults to True.
+            **kwargs: Additional keyword arguments passed to the Group superclass.
         """
-        super().__init__()
+        super().__init__(**kwargs)
 
         self.elements = [Mobject() for _ in range(64)]
         self.square_colors = square_colors
@@ -339,7 +340,7 @@ class ChessBoard(Group):
         start_index = self.position_to_index(start_pos)
         end_index = self.position_to_index(end_pos)
         end_square = self.squares[end_pos].get_center()
-        
+            
         # Handle pawn promotion
         if move.promotion:
             return self.handle_promotion(move)
@@ -370,6 +371,20 @@ class ChessBoard(Group):
 
                 move_animation = piece.animate.move_to(end_square)
                 animations.append(move_animation)
+                
+                if self.chessboard.is_checkmate():
+                    # Perform checkmate animation
+                    checkmate_text = Text("Checkmate!", font="Ubuntu Mono").scale(1.5)
+                    checkmate_text.move_to(self.board.get_center())
+                    animations.append(FadeIn(checkmate_text))
+                    return AnimationGroup(*animations)
+                elif self.chessboard.is_stalemate():
+                    # Perform stalemate animation
+                    stalemate_text = Text("Stalemate!", font="Ubuntu Mono").scale(1.5)
+                    stalemate_text.move_to(self.board.get_center())
+                    animations.append(FadeIn(stalemate_text))
+                    return AnimationGroup(*animations)
+
 
                 return AnimationGroup(*animations)
         else:
