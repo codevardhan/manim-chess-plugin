@@ -1,5 +1,5 @@
 from manim import *
-import chess
+import chess, chess.pgn
 import os
 
 # Define paths relative to the current file
@@ -112,74 +112,7 @@ class ChessBoard(Group):
         piece = piece_mobject.move_to(square_position)
         self.elements[index] = piece
         self.group_elements()
-
-    def initialize_board(self, invert=False):
-        pieces = [
-            (Rook, 'a1'), (Knight, 'b1'), (Bishop, 'c1'),
-            (Queen, 'd1'), (King, 'e1'), (Bishop, 'f1'),
-            (Knight, 'g1'), (Rook, 'h1')
-        ]
-        clr1, clr2 = (WHITE, BLACK) if not invert else (BLACK, WHITE)
-
-        for letter in 'abcdefgh':
-            position = f"{letter}2"
-            index = self.position_to_index(position)
-            pawn = Pawn(clr1).move_to(self.squares[position].get_center())
-            self.elements[index] = pawn
-
-        for piece, position in pieces:
-            chess_piece = piece(clr1).move_to(
-                self.squares[position].get_center())
-            index = self.position_to_index(position)
-            self.elements[index] = chess_piece
-
-        for letter in 'abcdefgh':
-            position = f"{letter}7"
-            index = self.position_to_index(position)
-            pawn = Pawn(clr2).move_to(self.squares[position].get_center())
-            self.elements[index] = pawn
-
-        for piece, position in pieces:
-            new_position = position.replace('1', '8')
-            chess_piece = piece(clr2).move_to(
-                self.squares[new_position].get_center())
-            index = self.position_to_index(new_position)
-            self.elements[index] = chess_piece
-
-        self.group_elements()
-
-    def load_fen(self, fen):
-        """
-        Load a board position from a FEN string.
-        """
-        self.elements = [Mobject() for _ in range(64)]
-        
-        rows = fen.split()[0].split('/')
-        piece_map = {
-            'r': Rook, 'n': Knight, 'b': Bishop, 'q': Queen, 'k': King, 'p': Pawn,
-            'R': Rook, 'N': Knight, 'B': Bishop, 'Q': Queen, 'K': King, 'P': Pawn
-        }
-        colors = {
-            'r': BLACK, 'n': BLACK, 'b': BLACK, 'q': BLACK, 'k': BLACK, 'p': BLACK,
-            'R': WHITE, 'N': WHITE, 'B': WHITE, 'Q': WHITE, 'K': WHITE, 'P': WHITE
-        }
-
-        for rank_index, row in enumerate(rows):
-            file_index = 0
-            for char in row:
-                if char.isdigit():
-                    file_index += int(char)
-                else:
-                    position = f"{chr(ord('a') + file_index)}{8 - rank_index}"
-                    piece_class = piece_map[char]
-                    color = colors[char]
-                    chess_piece = piece_class(color).move_to(self.squares[position].get_center())
-                    index = self.position_to_index(position)
-                    self.elements[index] = chess_piece
-                    file_index += 1
-        
-        self.group_elements()
-        
+  
     def handle_castling(self, move: chess.Move):
         # Execute castling move
         self.chessboard.push(move)
@@ -318,6 +251,84 @@ class ChessBoard(Group):
         else:
             raise ValueError(f"Invalid move: {move}")
 
+    def initialize_board(self, invert=False):
+        pieces = [
+            (Rook, 'a1'), (Knight, 'b1'), (Bishop, 'c1'),
+            (Queen, 'd1'), (King, 'e1'), (Bishop, 'f1'),
+            (Knight, 'g1'), (Rook, 'h1')
+        ]
+        clr1, clr2 = (WHITE, BLACK) if not invert else (BLACK, WHITE)
+
+        for letter in 'abcdefgh':
+            position = f"{letter}2"
+            index = self.position_to_index(position)
+            pawn = Pawn(clr1).move_to(self.squares[position].get_center())
+            self.elements[index] = pawn
+
+        for piece, position in pieces:
+            chess_piece = piece(clr1).move_to(
+                self.squares[position].get_center())
+            index = self.position_to_index(position)
+            self.elements[index] = chess_piece
+
+        for letter in 'abcdefgh':
+            position = f"{letter}7"
+            index = self.position_to_index(position)
+            pawn = Pawn(clr2).move_to(self.squares[position].get_center())
+            self.elements[index] = pawn
+
+        for piece, position in pieces:
+            new_position = position.replace('1', '8')
+            chess_piece = piece(clr2).move_to(
+                self.squares[new_position].get_center())
+            index = self.position_to_index(new_position)
+            self.elements[index] = chess_piece
+
+        self.group_elements()
+
+    def load_fen(self, fen):
+        """
+        Load a board position from a FEN string.
+        """
+        self.elements = [Mobject() for _ in range(64)]
+        
+        rows = fen.split()[0].split('/')
+        piece_map = {
+            'r': Rook, 'n': Knight, 'b': Bishop, 'q': Queen, 'k': King, 'p': Pawn,
+            'R': Rook, 'N': Knight, 'B': Bishop, 'Q': Queen, 'K': King, 'P': Pawn
+        }
+        colors = {
+            'r': BLACK, 'n': BLACK, 'b': BLACK, 'q': BLACK, 'k': BLACK, 'p': BLACK,
+            'R': WHITE, 'N': WHITE, 'B': WHITE, 'Q': WHITE, 'K': WHITE, 'P': WHITE
+        }
+
+        for rank_index, row in enumerate(rows):
+            file_index = 0
+            for char in row:
+                if char.isdigit():
+                    file_index += int(char)
+                else:
+                    position = f"{chr(ord('a') + file_index)}{8 - rank_index}"
+                    piece_class = piece_map[char]
+                    color = colors[char]
+                    chess_piece = piece_class(color).move_to(self.squares[position].get_center())
+                    index = self.position_to_index(position)
+                    self.elements[index] = chess_piece
+                    file_index += 1
+        
+        self.group_elements()
+      
+    def load_pgn(self, pgn_path):
+        """
+        Load a game from a PGN file and return move array.
+        """
+        with open(pgn_path) as pgn_file:
+            game = chess.pgn.read_game(pgn_file)
+
+        board = chess.Board()
+        self.load_fen(board.fen())
+
+        return game.mainline_moves()
 
 class Pawn(Mobject):
     def __init__(self, color, path="", **kwargs):
