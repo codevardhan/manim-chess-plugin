@@ -39,7 +39,7 @@ class MovePieceExample(MovingCameraScene):
         chessboard.initialize_board()
         self.add(chessboard.board)
         self.wait(1)
-        self.play(chessboard.move_piece('e2e4'))
+        self.play(chessboard.execute_move('e2e4'))
         self.wait(2)
 ```
 
@@ -64,7 +64,7 @@ class PlayPGNExample(MovingCameraScene):
         games = chessboard.load_pgn("./example.pgn")
         game = games[0]
         for move in game:
-            self.play(chessboard.move_piece(move.uci()))
+            self.play(chessboard.execute_move(move.uci()))
             self.wait(0.5)
 ```
 

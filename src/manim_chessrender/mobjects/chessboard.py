@@ -317,7 +317,7 @@ class ChessBoard(Group):
         self.elements[end_index] = promotion_piece
         return AnimationGroup(*animations)
     
-    def move_piece(self, move: str):
+    def execute_move(self, move: str):
         """
         Moves a piece on the board according to the given UCI move string.
 
@@ -333,6 +333,8 @@ class ChessBoard(Group):
         
         # Move using python-chess
         move = chess.Move.from_uci(move)
+        if not (move in self.chessboard.legal_moves or self.strict_mode):
+            raise ValueError(f"Invalid move: {move}")
         
         start_pos = chess.square_name(move.from_square)
         end_pos = chess.square_name(move.to_square)
@@ -345,50 +347,43 @@ class ChessBoard(Group):
         if move.promotion:
             return self.handle_promotion(move)
     
-        if move in self.chessboard.legal_moves or self.strict_mode:
-            # Handle en passant
-            if move in self.chessboard.pseudo_legal_moves and self.chessboard.is_en_passant(move):
+        # Handle special moves (en passant or castling)
+        if move in self.chessboard.pseudo_legal_moves:
+            if self.chessboard.is_en_passant(move):
                 return self.handle_en_passant(move)
-            # Handle castling
             elif move.uci() in ['e1g1', 'e1c1', 'e8g8', 'e8c8']:
                 return self.handle_castling(move)
-            else:
-                self.chessboard.push(move)
 
-                piece = self.elements[start_index]
-                target_piece = self.elements[end_index]
+    
+        self.chessboard.push(move)
 
-                animations = []
+        piece = self.elements[start_index]
+        target_piece = self.elements[end_index]
 
-                # Check if there's a piece at the end position
-                if target_piece != Mobject():
-                    # Add special capture animation
-                    capture_animation = FadeOut(target_piece)
-                    animations.append(capture_animation)
+        animations = []
 
-                self.elements[end_index] = piece
-                self.elements[start_index] = Mobject()
+        # Check if there's a piece at the end position
+        if target_piece != Mobject():
+            animations.append(FadeOut(target_piece))
 
-                move_animation = piece.animate.move_to(end_square)
-                animations.append(move_animation)
-                
-                if self.chessboard.is_checkmate():
-                    # Perform checkmate animation
-                    checkmate_text = Text("Checkmate!", font="Ubuntu Mono").scale(1.5)
-                    checkmate_text.move_to(self.board.get_center())
-                    animations.append(FadeIn(checkmate_text))
-                    return AnimationGroup(*animations)
-                elif self.chessboard.is_stalemate():
-                    # Perform stalemate animation
-                    stalemate_text = Text("Stalemate!", font="Ubuntu Mono").scale(1.5)
-                    stalemate_text.move_to(self.board.get_center())
-                    animations.append(FadeIn(stalemate_text))
-                    return AnimationGroup(*animations)
+        self.elements[end_index] = piece
+        self.elements[start_index] = Mobject()
 
+        move_animation = piece.animate.move_to(end_square)
+        animations.append(move_animation)
+        
+        if self.chessboard.is_checkmate():
+            # Perform checkmate animation
+            checkmate_text = Text("Checkmate!", font="Ubuntu Mono").scale(1.5)
+            checkmate_text.move_to(self.board.get_center())
+            animations.append(FadeIn(checkmate_text))
+        elif self.chessboard.is_stalemate():
+            # Perform stalemate animation
+            stalemate_text = Text("Stalemate!", font="Ubuntu Mono").scale(1.5)
+            stalemate_text.move_to(self.board.get_center())
+            animations.append(FadeIn(stalemate_text))
 
-                return AnimationGroup(*animations)
-        else:
-            raise ValueError(f"Invalid move: {move}")
+        return AnimationGroup(*animations)
 
     def initialize_board(self, invert=False):
         """

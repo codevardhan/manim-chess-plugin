@@ -20,7 +20,7 @@ class MovePieceExample(MovingCameraScene):
         chessboard.initialize_board()
         self.add(chessboard.board)
         self.wait(1)
-        self.play(chessboard.move_piece('e2e4'))
+        self.play(chessboard.execute_move('e2e4'))
         self.wait(2)
 
 class LoadFENExample(MovingCameraScene):
@@ -46,8 +46,8 @@ class CastlingExample(MovingCameraScene):
         # Move pieces to prepare for castling
         moves = ['e2e4', 'e7e5', 'g1f3', 'g8f6', 'f1e2', 'f8e7']
         for move in moves:
-            self.play(chessboard.move_piece(move))
-        self.play(chessboard.move_piece('e1g1'))  # Kingside castling
+            self.play(chessboard.execute_move(move))
+        self.play(chessboard.execute_move('e1g1'))  # Kingside castling
         self.wait(2)
 
 class EnPassantExample(MovingCameraScene):
@@ -62,8 +62,8 @@ class EnPassantExample(MovingCameraScene):
         # Move pieces to prepare for en passant
         moves = ['e2e4', 'e7e5', 'd2d4', 'e5d4', 'c2c4']
         for move in moves:
-            self.play(chessboard.move_piece(move))
-        self.play(chessboard.move_piece('d4c3'))  # En passant
+            self.play(chessboard.execute_move(move))
+        self.play(chessboard.execute_move('d4c3'))  # En passant
         self.wait(2)
 
 class PlayPGNExample(MovingCameraScene):
@@ -79,7 +79,7 @@ class PlayPGNExample(MovingCameraScene):
         games = chessboard.load_pgn(".example/example.pgn")
         game = games[0]
         for move in game:
-            self.play(chessboard.move_piece(move.uci()))
+            self.play(chessboard.execute_move(move.uci()))
             self.wait(0.5)
 
 class TestExample(MovingCameraScene):
@@ -90,10 +90,29 @@ class TestExample(MovingCameraScene):
         chessboard = ChessBoard()
         chessboard.load_fen("8/4P3/8/8/8/8/8/8 w - - 0 1")
         self.add(chessboard.board)
-        self.play(chessboard.move_piece("e7e8q"))
+        self.play(chessboard.execute_move("e7e8q"))
         
             
-             
+class TestChessAnimations(Scene):
+    def construct(self):
+        chessboard = ChessBoard()
+        fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
+        chessboard.load_fen(fen)
+        self.add(chessboard.board)
+        
+        # Define a sequence of moves to reach checkmate or stalemate
+        moves = ["g2g4", "e7e5", "f2f3", "d8h4"]
+
+        for move in moves:
+            try:
+                anim = chessboard.execute_move(move)
+                self.play(anim)
+            except ValueError as e:
+                print(f"Invalid move {move}: {e}")
+                break
+        
+        self.wait(2)
+        
             
 if __name__ == "__main__":
 #     scenes = [
@@ -106,5 +125,5 @@ if __name__ == "__main__":
 #     # render an entire game from pgn
 #     scene_instance = scenes[4]()
 #     scene_instance.render()
-    scene_instance = TestExample()
+    scene_instance = TestChessAnimations()
     scene_instance.render()
