@@ -423,28 +423,32 @@ class ChessBoard(Group):
         return games
 
 class ChessPiece(Mobject):
-    def __init__(self, color, piece_name, path="", **kwargs):
+    def __init__(self, color: ManimColor, piece_name: str, path="", **kwargs):
         """
         Initializes a ChessPiece object with the specified color and piece name.
 
         Args:
-            color (str): The color of the chess piece (WHITE or BLACK).
+            color (ManimColor): The color of the chess piece (WHITE or BLACK).
             piece_name (str): The name of the chess piece (e.g., "pawn", "king").
             path (str, optional): The file path to the piece image. Defaults to an empty string.
             **kwargs: Additional keyword arguments for the Mobject superclass.
         """
         super().__init__(**kwargs)
         self.color = color
-        default_path = os.path.join(data_dir, f"{color.lower()}-{piece_name}")
+        if str(color)=="#FFFFFF":
+            color_str = "white"
+        else:
+            color_str = "black"
+            
+        default_path = os.path.join(data_dir, f"{color_str}-{piece_name}")
         self.add(ImageMobject(path or default_path).scale(0.5))
         
 class Pawn(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
+    def __init__(self, color: ManimColor, path="", **kwargs):
         """
         Initializes a Pawn object with the specified color and image path.
-
         Args:
-            color (str): The color of the pawn (WHITE or BLACK).
+            color (ManimColor): The color of the pawn (WHITE or BLACK).
             path (str, optional): The file path to the pawn image. Defaults to an empty string.
             **kwargs: Additional keyword arguments for the ChessPiece superclass.
         """
