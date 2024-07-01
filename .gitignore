@@ -1,0 +1,4 @@
+env/
+manim/
+media
+__pycache__

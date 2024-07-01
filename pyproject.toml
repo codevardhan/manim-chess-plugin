@@ -1,0 +1,15 @@
+[tool.poetry]
+name = "manim-chessrender"
+version = "0.1.0"
+description = ""
+authors = ["codevardhan <harsha7vardhan@gmail.com>"]
+readme = "README.md"
+packages = [{include = "manim_chessrender", from = "src"}]
+
+[tool.poetry.dependencies]
+python = "^3.10"
+
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
