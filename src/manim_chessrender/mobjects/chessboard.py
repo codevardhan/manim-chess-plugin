@@ -366,7 +366,6 @@ class ChessBoard(Group):
                 self.squares[new_position].get_center())
             index = self.position_to_index(new_position)
             self.elements[index] = chess_piece
-
         self.group_elements()
 
     def load_fen(self, fen):
@@ -417,8 +416,6 @@ class ChessBoard(Group):
                 game = chess.pgn.read_game(pgn_file)
                 if game is None:
                     break
-                board = chess.Board()
-                self.load_fen(board.fen())
                 games.append(list(game.mainline_moves()))
         return games
 
