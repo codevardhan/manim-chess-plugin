@@ -402,110 +402,90 @@ class ChessBoard(Group):
 
         return game.mainline_moves()
 
-class Pawn(Mobject):
-    def __init__(self, color, path="", **kwargs):
+class ChessPiece(Mobject):
+    def __init__(self, color, piece_name, path="", **kwargs):
+        """
+        Initializes a ChessPiece object with the specified color and piece name.
+
+        Args:
+            color (str): The color of the chess piece (WHITE or BLACK).
+            piece_name (str): The name of the chess piece (e.g., "pawn", "king").
+            path (str, optional): The file path to the piece image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the Mobject superclass.
+        """
         super().__init__(**kwargs)
         self.color = color
-        self.createpiece(path)
-
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(data_dir, "white-pawn")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(data_dir, "black-pawn")
-            self.add(ImageMobject(path).scale(0.5))
-
-
-class King(Mobject):
+        default_path = os.path.join(data_dir, f"{color.lower()}-{piece_name}")
+        self.add(ImageMobject(path or default_path).scale(0.5))
+        
+class Pawn(ChessPiece):
     def __init__(self, color, path="", **kwargs):
-        super().__init__(**kwargs)
-        self.color = color
-        self.createpiece(path)
+        """
+        Initializes a Pawn object with the specified color and image path.
 
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(data_dir, "white-king")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(data_dir, "black-king")
-            self.add(ImageMobject(path).scale(0.5))
+        Args:
+            color (str): The color of the pawn (WHITE or BLACK).
+            path (str, optional): The file path to the pawn image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "pawn", path, **kwargs)
 
-
-class Queen(Mobject):
+class King(ChessPiece):
     def __init__(self, color, path="", **kwargs):
-        super().__init__(**kwargs)
-        self.color = color
-        self.createpiece(path)
+        """
+        Initializes a King object with the specified color and image path.
 
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(
-                data_dir, "white-queen")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(
-                data_dir, "black-queen")
-            self.add(ImageMobject(path).scale(0.5))
+        Args:
+            color (str): The color of the king (WHITE or BLACK).
+            path (str, optional): The file path to the king image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "king", path, **kwargs)
 
-
-class Knight(Mobject):
+class Queen(ChessPiece):
     def __init__(self, color, path="", **kwargs):
-        super().__init__(**kwargs)
-        self.color = color
-        self.createpiece(path)
+        """
+        Initializes a Queen object with the specified color and image path.
 
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(
-                data_dir, "white-knight")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(
-                data_dir, "black-knight")
-            self.add(ImageMobject(path).scale(0.5))
+        Args:
+            color (str): The color of the queen (WHITE or BLACK).
+            path (str, optional): The file path to the queen image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "queen", path, **kwargs)
 
-
-class Bishop(Mobject):
+class Knight(ChessPiece):
     def __init__(self, color, path="", **kwargs):
-        super().__init__(**kwargs)
-        self.color = color
-        self.createpiece(path)
+        """
+        Initializes a Knight object with the specified color and image path.
 
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(
-                data_dir, "white-bishop")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(
-                data_dir, "black-bishop")
-            self.add(ImageMobject(path).scale(0.5))
+        Args:
+            color (str): The color of the knight (WHITE or BLACK).
+            path (str, optional): The file path to the knight image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "knight", path, **kwargs)
 
-
-class Rook(Mobject):
+class Bishop(ChessPiece):
     def __init__(self, color, path="", **kwargs):
-        super().__init__(**kwargs)
-        self.color = color
-        self.createpiece(path)
+        """
+        Initializes a Bishop object with the specified color and image path.
 
-    def createpiece(self, path):
-        if self.color == WHITE:
-            path = path if path != "" else os.path.join(data_dir, "white-rook")
-            self.add(ImageMobject(path).scale(0.5))
-        else:
-            path = path if path != "" else os.path.join(data_dir, "black-rook")
-            self.add(ImageMobject(path).scale(0.5))
+        Args:
+            color (str): The color of the bishop (WHITE or BLACK).
+            path (str, optional): The file path to the bishop image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "bishop", path, **kwargs)
 
+class Rook(ChessPiece):
+    def __init__(self, color, path="", **kwargs):
+        """
+        Initializes a Rook object with the specified color and image path.
 
-# class ChessScene(Scene):
-#     def construct(self):
-#         chessboard = ChessBoard()
-#         chessboard.initialize_board()
-#         self.add(chessboard.board)
-#         self.wait(2)
-
-
-# if __name__ == "__main__":
-#     scene = ChessScene()
-#     scene.render()
+        Args:
+            color (str): The color of the rook (WHITE or BLACK).
+            path (str, optional): The file path to the rook image. Defaults to an empty string.
+            **kwargs: Additional keyword arguments for the ChessPiece superclass.
+        """
+        super().__init__(color, "rook", path, **kwargs)
