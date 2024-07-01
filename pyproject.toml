@@ -13,3 +13,7 @@ python = "^3.10"
 [build-system]
 requires = ["poetry-core"]
 build-backend = "poetry.core.masonry.api"
+
+
+[tool.poetry.plugins."manim.plugins"]
+"manim_chessrender" = "manim_chessrender"
