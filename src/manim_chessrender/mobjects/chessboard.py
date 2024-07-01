@@ -148,6 +148,38 @@ class ChessBoard(Group):
 
         self.group_elements()
 
+    def load_fen(self, fen):
+        """
+        Load a board position from a FEN string.
+        """
+        self.elements = [Mobject() for _ in range(64)]
+        
+        rows = fen.split()[0].split('/')
+        piece_map = {
+            'r': Rook, 'n': Knight, 'b': Bishop, 'q': Queen, 'k': King, 'p': Pawn,
+            'R': Rook, 'N': Knight, 'B': Bishop, 'Q': Queen, 'K': King, 'P': Pawn
+        }
+        colors = {
+            'r': BLACK, 'n': BLACK, 'b': BLACK, 'q': BLACK, 'k': BLACK, 'p': BLACK,
+            'R': WHITE, 'N': WHITE, 'B': WHITE, 'Q': WHITE, 'K': WHITE, 'P': WHITE
+        }
+
+        for rank_index, row in enumerate(rows):
+            file_index = 0
+            for char in row:
+                if char.isdigit():
+                    file_index += int(char)
+                else:
+                    position = f"{chr(ord('a') + file_index)}{8 - rank_index}"
+                    piece_class = piece_map[char]
+                    color = colors[char]
+                    chess_piece = piece_class(color).move_to(self.squares[position].get_center())
+                    index = self.position_to_index(position)
+                    self.elements[index] = chess_piece
+                    file_index += 1
+        
+        self.group_elements()
+        
     def handle_castling(self, move: chess.Move):
         # Execute castling move
         self.chessboard.push(move)
