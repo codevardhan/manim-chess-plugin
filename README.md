@@ -5,7 +5,9 @@ A Manim plugin that allows you to generate scenes with chessboards with minimal 
 
 ## Installation
 
-
+```bash
+pip install manim-chessrender
+```
 
 ## Features
 

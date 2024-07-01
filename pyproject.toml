@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "manim-chessrender"
 version = "0.1.0"
-description = ""
+description = "A Manim plugin that allows you to generate scenes with chessboards with minimal setup."
 authors = ["codevardhan <harsha7vardhan@gmail.com>"]
 readme = "README.md"
 packages = [{include = "manim_chessrender", from = "src"}]
