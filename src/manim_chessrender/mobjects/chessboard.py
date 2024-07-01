@@ -10,7 +10,27 @@ data_dir = os.path.join(parent_module_dir, 'images')
 
 
 class ChessBoard(Group):
+    """
+    A class representing a chessboard with pieces.
+
+    Attributes:
+        elements (list): A list containing the Mobject instances for the 64 squares.
+        square_colors (tuple): A tuple containing the colors of the squares.
+        line_color (color): The color of the lines.
+        strict_mode (bool): A flag for strict mode.
+        squares (dict): A dictionary mapping positions to their respective Square objects.
+        chessboard (chess.Board): A chess board object from the python-chess library.
+    """
+    
     def __init__(self, square_colors=(WHITE, GREEN), line_color=BLACK, strict_mode=True):
+        """
+        Initializes the ChessBoard with the given square colors, line color, and strict mode flag.
+
+        Args:
+            square_colors (tuple, optional): Colors of the squares. Defaults to (WHITE, GREEN).
+            line_color (color, optional): Color of the lines. Defaults to BLACK.
+            strict_mode (bool, optional): Flag for strict mode. Defaults to True.
+        """
         super().__init__()
 
         self.elements = [Mobject() for _ in range(64)]
@@ -25,6 +45,66 @@ class ChessBoard(Group):
         self.color_squares()
         self.add_labels()
         self.group_elements()
+
+    def position_squares(self):
+        """
+        Positions the squares on the board in their correct locations.
+        """
+        self.squares['e5'].move_to(UP * 0.5 + RIGHT * 0.5)
+
+        for i in range(4, 0, -1):
+            self.squares[f'e{i}'].next_to(
+                self.squares[f'e{i + 1}'], DOWN, buff=0)
+        for i in range(6, 9):
+            self.squares[f'e{i}'].next_to(
+                self.squares[f'e{i - 1}'], UP, buff=0)
+
+        for row in 'dcba':
+            self.squares[f'{row}1'].next_to(
+                self.squares[f'{chr(ord(row) + 1)}1'], LEFT, buff=0)
+        for row in 'fg':
+            self.squares[f'{row}1'].next_to(
+                self.squares[f'{chr(ord(row) - 1)}1'], RIGHT, buff=0)
+        self.squares['h1'].next_to(self.squares['g1'], RIGHT, buff=0)
+
+        for row in 'abcdefgh':
+            for col in range(2, 9):
+                self.squares[f'{row}{col}'].next_to(
+                    self.squares[f'{row}{col - 1}'], UP, buff=0)
+
+    def color_squares(self):
+        """
+        Colors the squares on the board in a checkerboard pattern.
+        """
+        color1, color2 = self.square_colors
+        for row in 'abcdefgh':
+            for col in range(1, 9):
+                color = color2 if col % 2 == 1 else color1
+                self.squares[f'{row}{col}'].set_fill(color, opacity=0.7)
+            color1, color2 = color2, color1
+
+    def add_labels(self):
+        """
+        Adds labels to the squares on the board indicating ranks and files.
+        """
+        self.labels = []
+        color1, color2 = self.square_colors
+        for idx, letter in enumerate('abcdefgh'):
+            color = color2 if idx % 2 == 1 else color1
+            self.labels.append(Text(letter, font="Ubuntu Mono", color=color).move_to(
+                self.squares[f'{letter}1'].get_center() + DOWN * 0.35 + RIGHT * 0.35).scale(0.3))
+        for idx in range(1, 9):
+            color = color1 if idx % 2 == 1 else color2
+            self.labels.append(Text(str(idx), font="Ubuntu Mono", color=color).move_to(
+                self.squares[f'a{idx}'].get_center() + UP * 0.35 + LEFT * 0.35).scale(0.3))
+
+    def group_elements(self):
+        """
+        Groups all the squares, labels, and elements into a single group and adds it to the board.
+        """
+        self.board = Group(*self.squares.values(), *
+                           self.labels, *self.elements)
+        self.add(self.board)
 
     def index_to_position(self, index: int) -> str:
         """
@@ -58,55 +138,14 @@ class ChessBoard(Group):
         row = int(position[1]) - 1
         return row * 8 + col
 
-    def position_squares(self):
-        self.squares['e5'].move_to(UP * 0.5 + RIGHT * 0.5)
-
-        for i in range(4, 0, -1):
-            self.squares[f'e{i}'].next_to(
-                self.squares[f'e{i + 1}'], DOWN, buff=0)
-        for i in range(6, 9):
-            self.squares[f'e{i}'].next_to(
-                self.squares[f'e{i - 1}'], UP, buff=0)
-
-        for row in 'dcba':
-            self.squares[f'{row}1'].next_to(
-                self.squares[f'{chr(ord(row) + 1)}1'], LEFT, buff=0)
-        for row in 'fg':
-            self.squares[f'{row}1'].next_to(
-                self.squares[f'{chr(ord(row) - 1)}1'], RIGHT, buff=0)
-        self.squares['h1'].next_to(self.squares['g1'], RIGHT, buff=0)
-
-        for row in 'abcdefgh':
-            for col in range(2, 9):
-                self.squares[f'{row}{col}'].next_to(
-                    self.squares[f'{row}{col - 1}'], UP, buff=0)
-
-    def color_squares(self):
-        color1, color2 = self.square_colors
-        for row in 'abcdefgh':
-            for col in range(1, 9):
-                color = color2 if col % 2 == 1 else color1
-                self.squares[f'{row}{col}'].set_fill(color, opacity=0.7)
-            color1, color2 = color2, color1
-
-    def add_labels(self):
-        self.labels = []
-        color1, color2 = self.square_colors
-        for idx, letter in enumerate('abcdefgh'):
-            color = color2 if idx % 2 == 1 else color1
-            self.labels.append(Text(letter, font="Ubuntu Mono", color=color).move_to(
-                self.squares[f'{letter}1'].get_center() + DOWN * 0.35 + RIGHT * 0.35).scale(0.3))
-        for idx in range(1, 9):
-            color = color1 if idx % 2 == 1 else color2
-            self.labels.append(Text(str(idx), font="Ubuntu Mono", color=color).move_to(
-                self.squares[f'a{idx}'].get_center() + UP * 0.35 + LEFT * 0.35).scale(0.3))
-
-    def group_elements(self):
-        self.board = Group(*self.squares.values(), *
-                           self.labels, *self.elements)
-        self.add(self.board)
-
     def add_element(self, position: str, piece_mobject: Mobject):
+        """
+        Adds a chess piece to the board at the specified position.
+
+        Args:
+            position (str): The board position (e.g., 'e4').
+            piece_mobject (Mobject): The graphical object representing the chess piece.
+        """
         index = self.position_to_index(position)
         square_position = self.squares[position].get_center()
         piece = piece_mobject.move_to(square_position)
@@ -114,6 +153,15 @@ class ChessBoard(Group):
         self.group_elements()
   
     def handle_castling(self, move: chess.Move):
+        """
+        Handles castling moves on the board.
+
+        Args:
+            move (chess.Move): A move object representing the castling move.
+
+        Returns:
+            AnimationGroup: An animation group showing the castling move.
+        """
         # Execute castling move
         self.chessboard.push(move)
         animations = []
@@ -169,6 +217,18 @@ class ChessBoard(Group):
         return AnimationGroup(*animations)
 
     def handle_en_passant(self, move: chess.Move):
+        """
+        Handles en passant captures on the board.
+
+        Args:
+            move (chess.Move): A move object representing the en passant capture.
+
+        Returns:
+            AnimationGroup: An animation group showing the en passant capture.
+
+        Raises:
+            ValueError: If the move is not a valid en passant capture.
+        """
         animations = []
 
         # Remove the captured pawn from the board
@@ -209,7 +269,19 @@ class ChessBoard(Group):
         else:
             raise ValueError(f"Invalid move: {move}")
 
-    def move_piece(self, move: chess.Move):
+    def move_piece(self, move: str):
+        """
+        Moves a piece on the board according to the given UCI move string.
+
+        Args:
+            move (str): The UCI string representing the move (e.g., 'e2e4').
+
+        Returns:
+            AnimationGroup: An animation group showing the move.
+
+        Raises:
+            ValueError: If the move is invalid.
+        """
         start_pos = move[0:2]
         end_pos = move[2:]
 
