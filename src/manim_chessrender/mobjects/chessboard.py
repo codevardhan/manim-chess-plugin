@@ -269,6 +269,53 @@ class ChessBoard(Group):
         else:
             raise ValueError(f"Invalid move: {move}")
 
+    def handle_promotion(self, move: chess.Move):
+        """
+        Handles pawn promotion moves on the board.
+
+        Args:
+            move (chess.Move): A move object representing the pawn promotion move.
+
+        Returns:
+            AnimationGroup: An animation group showing the pawn promotion.
+
+        Raises:
+            ValueError: If the move is not a valid promotion move.
+        """
+        animations = []
+
+        # Execute promotion move
+        self.chessboard.push(move)
+
+        # Get end position of the promotion
+        start_pos = chess.square_name(move.from_square)
+        start_index = self.position_to_index(start_pos)
+        pawn_piece = self.elements[start_index]
+        
+        end_pos = chess.square_name(move.to_square)
+        end_index = self.position_to_index(end_pos)
+        end_square = self.squares[end_pos].get_center()
+        
+        # Replace the pawn with the promoted piece
+        # TODO: make promotion animation smoother
+         
+        promotion_piece = {
+            '5': Queen, '4': Rook, '3': Bishop, '2': Knight
+        }.get(str(move.promotion), Queen)(pawn_piece.color)
+        
+        promotion_animation = pawn_piece.animate.move_to(end_square)
+        animations.append(promotion_animation)
+
+        capture_animation = FadeOut(pawn_piece)
+        animations.append(capture_animation)
+        
+        promotion_piece.move_to(end_square)
+        final_animation = FadeIn(promotion_piece)
+        animations.append(final_animation)
+        
+        self.elements[end_index] = promotion_piece
+        return AnimationGroup(*animations)
+    
     def move_piece(self, move: str):
         """
         Moves a piece on the board according to the given UCI move string.
@@ -282,16 +329,21 @@ class ChessBoard(Group):
         Raises:
             ValueError: If the move is invalid.
         """
-        start_pos = move[0:2]
-        end_pos = move[2:]
-
+        
+        # Move using python-chess
+        move = chess.Move.from_uci(move)
+        
+        start_pos = chess.square_name(move.from_square)
+        end_pos = chess.square_name(move.to_square)
+        
         start_index = self.position_to_index(start_pos)
         end_index = self.position_to_index(end_pos)
         end_square = self.squares[end_pos].get_center()
-
-        # Move using python-chess
-        move = chess.Move.from_uci(move)
-
+        
+        # Handle pawn promotion
+        if move.promotion:
+            return self.handle_promotion(move)
+    
         if move in self.chessboard.legal_moves or self.strict_mode:
             # Handle en passant
             if move in self.chessboard.pseudo_legal_moves and self.chessboard.is_en_passant(move):

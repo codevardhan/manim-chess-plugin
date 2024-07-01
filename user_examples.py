@@ -81,11 +81,30 @@ class PlayPGNExample(MovingCameraScene):
         for move in game:
             self.play(chessboard.move_piece(move.uci()))
             self.wait(0.5)
+
+class TestExample(MovingCameraScene):
+    """
+    Scene to demonstrate playing moves from a PGN file on the chessboard.
+    """
+    def construct(self):
+        chessboard = ChessBoard()
+        chessboard.load_fen("8/4P3/8/8/8/8/8/8 w - - 0 1")
+        self.add(chessboard.board)
+        self.play(chessboard.move_piece("e7e8q"))
+        
             
+             
             
 if __name__ == "__main__":
-    scenes = [InitializeChessBoard, MovePieceExample, LoadFENExample, CastlingExample, EnPassantExample, PlayPGNExample]
-    # render an entire game from pgn
-    scene_instance = scenes[-1]()
+#     scenes = [
+#             InitializeChessBoard,
+#               MovePieceExample,
+#               LoadFENExample,
+#               CastlingExample,
+#               EnPassantExample,
+#               PlayPGNExample]
+#     # render an entire game from pgn
+#     scene_instance = scenes[4]()
+#     scene_instance.render()
+    scene_instance = TestExample()
     scene_instance.render()
-
