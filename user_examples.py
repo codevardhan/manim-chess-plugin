@@ -76,54 +76,21 @@ class PlayPGNExample(MovingCameraScene):
         self.add(chessboard.board)
         self.wait(1)
         
-        games = chessboard.load_pgn(".example/example.pgn")
+        games = chessboard.load_pgn("./example/example.pgn")
         game = games[0]
         for move in game:
             self.play(chessboard.execute_move(move.uci()))
             self.wait(0.5)
 
-class TestExample(MovingCameraScene):
-    """
-    Scene to demonstrate playing moves from a PGN file on the chessboard.
-    """
-    def construct(self):
-        chessboard = ChessBoard()
-        chessboard.load_fen("8/4P3/8/8/8/8/8/8 w - - 0 1")
-        self.add(chessboard.board)
-        self.play(chessboard.execute_move("e7e8q"))
-        
-            
-class TestChessAnimations(Scene):
-    def construct(self):
-        chessboard = ChessBoard()
-        fen = "rnbqkbnr/pppppppp/8/8/8/8/PPPPPPPP/RNBQKBNR w KQkq - 0 1"
-        chessboard.load_fen(fen)
-        self.add(chessboard.board)
-        
-        # Define a sequence of moves to reach checkmate or stalemate
-        moves = ["g2g4", "e7e5", "f2f3", "d8h4"]
-
-        for move in moves:
-            try:
-                anim = chessboard.execute_move(move)
-                self.play(anim)
-            except ValueError as e:
-                print(f"Invalid move {move}: {e}")
-                break
-        
-        self.wait(2)
-        
             
 if __name__ == "__main__":
-#     scenes = [
-#             InitializeChessBoard,
-#               MovePieceExample,
-#               LoadFENExample,
-#               CastlingExample,
-#               EnPassantExample,
-#               PlayPGNExample]
-#     # render an entire game from pgn
-#     scene_instance = scenes[4]()
-#     scene_instance.render()
-    scene_instance = TestChessAnimations()
-    scene_instance.render()
+    scenes = [
+            InitializeChessBoard,
+              MovePieceExample,
+              LoadFENExample,
+              CastlingExample,
+              EnPassantExample,
+              PlayPGNExample]
+    for scene in scenes:
+        scene_instance = scene()
+        scene_instance.render()
