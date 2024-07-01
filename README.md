@@ -27,6 +27,9 @@ To render the examples, you need to run the script using Manim. Below are the ex
 ### MovePieceExample
 This example initializes the chessboard and demonstrates moving a piece.
 
+![MovePieceExample](https://github.com/codevardhan/manim-chess-plugin/blob/main/example/MovePieceExampleGif.gif?raw=true)
+
+
 ```python
 
 class MovePieceExample(MovingCameraScene):
@@ -47,6 +50,9 @@ class MovePieceExample(MovingCameraScene):
 
 ### PlayPGNExample
 This example demonstrates playing moves from a PGN file on the chessboard.
+
+![PlayPGNExample](https://github.com/codevardhan/manim-chess-plugin/blob/main/example/PlayPGNExample.gif?raw=true)
+
 
 ```python
 
