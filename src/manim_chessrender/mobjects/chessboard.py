@@ -324,6 +324,17 @@ class ChessBoard(Group):
             raise ValueError(f"Invalid move: {move}")
 
     def initialize_board(self, invert=False):
+        """
+        Initializes the chessboard with the standard piece positions.
+
+        Args:
+            invert (bool, optional): If True, inverts the board by switching the colors of the pieces.
+                                    Defaults to False.
+
+        This method sets up the chessboard by placing pawns, rooks, knights, bishops, the queen, and the king
+        in their standard starting positions. The color of the pieces can be inverted by setting the `invert`
+        parameter to True.
+        """
         pieces = [
             (Rook, 'a1'), (Knight, 'b1'), (Bishop, 'c1'),
             (Queen, 'd1'), (King, 'e1'), (Bishop, 'f1'),
