@@ -1,7 +1,9 @@
-from manim import *
+from manim import WHITE, GREEN, BLACK, Group, Mobject, Square, UP,\
+DOWN, LEFT, RIGHT, Text, AnimationGroup, ManimColor, ImageMobject,\
+FadeOut, FadeIn
 import chess, chess.pgn
 import os
-
+from .chess_piece import Queen, King, Pawn, Rook, Bishop, Knight
 # Define paths relative to the current file
 module_dir = os.path.dirname(__file__)
 parent_module_dir = os.path.dirname(module_dir)
@@ -21,7 +23,7 @@ class ChessBoard(Group):
         squares (dict): A dictionary mapping positions to their respective Square objects.
         chessboard (chess.Board): A chess board object from the python-chess library.
     """
-    
+
     def __init__(self, square_colors=(WHITE, GREEN), line_color=BLACK, strict_mode=True, **kwargs):
         """
         Initializes the ChessBoard with the given square colors, line color, and strict mode flag.
@@ -292,31 +294,31 @@ class ChessBoard(Group):
         start_pos = chess.square_name(move.from_square)
         start_index = self.position_to_index(start_pos)
         pawn_piece = self.elements[start_index]
-        
+
         end_pos = chess.square_name(move.to_square)
         end_index = self.position_to_index(end_pos)
         end_square = self.squares[end_pos].get_center()
-        
+
         # Replace the pawn with the promoted piece
         # TODO: make promotion animation smoother
-         
+
         promotion_piece = {
             '5': Queen, '4': Rook, '3': Bishop, '2': Knight
         }.get(str(move.promotion), Queen)(pawn_piece.color)
-        
+
         promotion_animation = pawn_piece.animate.move_to(end_square)
         animations.append(promotion_animation)
 
         capture_animation = FadeOut(pawn_piece)
         animations.append(capture_animation)
-        
+
         promotion_piece.move_to(end_square)
         final_animation = FadeIn(promotion_piece)
         animations.append(final_animation)
-        
+
         self.elements[end_index] = promotion_piece
         return AnimationGroup(*animations)
-    
+
     def execute_move(self, move: str):
         """
         Moves a piece on the board according to the given UCI move string.
@@ -330,23 +332,25 @@ class ChessBoard(Group):
         Raises:
             ValueError: If the move is invalid.
         """
-        
+
         # Move using python-chess
         move = chess.Move.from_uci(move)
+        print(self.chessboard.legal_moves)
+
         if not (move in self.chessboard.legal_moves or self.strict_mode):
             raise ValueError(f"Invalid move: {move}")
-        
+
         start_pos = chess.square_name(move.from_square)
         end_pos = chess.square_name(move.to_square)
-        
+
         start_index = self.position_to_index(start_pos)
         end_index = self.position_to_index(end_pos)
         end_square = self.squares[end_pos].get_center()
-            
+
         # Handle pawn promotion
         if move.promotion:
             return self.handle_promotion(move)
-    
+
         # Handle special moves (en passant or castling)
         if move in self.chessboard.pseudo_legal_moves:
             if self.chessboard.is_en_passant(move):
@@ -354,7 +358,7 @@ class ChessBoard(Group):
             elif move.uci() in ['e1g1', 'e1c1', 'e8g8', 'e8c8']:
                 return self.handle_castling(move)
 
-    
+
         self.chessboard.push(move)
 
         piece = self.elements[start_index]
@@ -371,7 +375,7 @@ class ChessBoard(Group):
 
         move_animation = piece.animate.move_to(end_square)
         animations.append(move_animation)
-        
+
         if self.chessboard.is_checkmate():
             # Perform checkmate animation
             checkmate_text = Text("Checkmate!", font="Ubuntu Mono").scale(1.5)
@@ -435,7 +439,7 @@ class ChessBoard(Group):
         Load a board position from a FEN string.
         """
         self.elements = [Mobject() for _ in range(64)]
-        
+
         rows = fen.split()[0].split('/')
         piece_map = {
             'r': Rook, 'n': Knight, 'b': Bishop, 'q': Queen, 'k': King, 'p': Pawn,
@@ -459,10 +463,10 @@ class ChessBoard(Group):
                     index = self.position_to_index(position)
                     self.elements[index] = chess_piece
                     file_index += 1
-        
+
         self.group_elements()
-      
-    def load_pgn(self, pgn_path):
+
+    def load_pgn_and_get_games(self, pgn_path):
         """
         Load all games from a PGN file and return a list of move arrays for each game.
 
@@ -481,94 +485,3 @@ class ChessBoard(Group):
                 games.append(list(game.mainline_moves()))
         return games
 
-class ChessPiece(Mobject):
-    def __init__(self, color: ManimColor, piece_name: str, path="", **kwargs):
-        """
-        Initializes a ChessPiece object with the specified color and piece name.
-
-        Args:
-            color (ManimColor): The color of the chess piece (WHITE or BLACK).
-            piece_name (str): The name of the chess piece (e.g., "pawn", "king").
-            path (str, optional): The file path to the piece image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the Mobject superclass.
-        """
-        super().__init__(**kwargs)
-        self.color = color
-        if str(color)=="#FFFFFF":
-            color_str = "white"
-        else:
-            color_str = "black"
-            
-        default_path = os.path.join(data_dir, f"{color_str}-{piece_name}")
-        self.add(ImageMobject(path or default_path).scale(0.5))
-        
-class Pawn(ChessPiece):
-    def __init__(self, color: ManimColor, path="", **kwargs):
-        """
-        Initializes a Pawn object with the specified color and image path.
-        Args:
-            color (ManimColor): The color of the pawn (WHITE or BLACK).
-            path (str, optional): The file path to the pawn image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "pawn", path, **kwargs)
-
-class King(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
-        """
-        Initializes a King object with the specified color and image path.
-
-        Args:
-            color (str): The color of the king (WHITE or BLACK).
-            path (str, optional): The file path to the king image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "king", path, **kwargs)
-
-class Queen(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
-        """
-        Initializes a Queen object with the specified color and image path.
-
-        Args:
-            color (str): The color of the queen (WHITE or BLACK).
-            path (str, optional): The file path to the queen image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "queen", path, **kwargs)
-
-class Knight(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
-        """
-        Initializes a Knight object with the specified color and image path.
-
-        Args:
-            color (str): The color of the knight (WHITE or BLACK).
-            path (str, optional): The file path to the knight image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "knight", path, **kwargs)
-
-class Bishop(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
-        """
-        Initializes a Bishop object with the specified color and image path.
-
-        Args:
-            color (str): The color of the bishop (WHITE or BLACK).
-            path (str, optional): The file path to the bishop image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "bishop", path, **kwargs)
-
-class Rook(ChessPiece):
-    def __init__(self, color, path="", **kwargs):
-        """
-        Initializes a Rook object with the specified color and image path.
-
-        Args:
-            color (str): The color of the rook (WHITE or BLACK).
-            path (str, optional): The file path to the rook image. Defaults to an empty string.
-            **kwargs: Additional keyword arguments for the ChessPiece superclass.
-        """
-        super().__init__(color, "rook", path, **kwargs)
