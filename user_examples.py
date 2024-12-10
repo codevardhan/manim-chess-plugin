@@ -76,7 +76,7 @@ class PlayPGNExample(MovingCameraScene):
         self.add(chessboard.board)
         self.wait(1)
         
-        games = chessboard.load_pgn("./example/example.pgn")
+        games = chessboard.load_pgn_and_get_games("./example/example.pgn")
         game = games[0]
         for move in game:
             self.play(chessboard.execute_move(move.uci()))
